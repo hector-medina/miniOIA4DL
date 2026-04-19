@@ -15,6 +15,8 @@ class Conv2D(Layer):
         # MODIFICAR: Añadir nuevo if-else para otros algoritmos de convolución
         if conv_algo == 0:
             self.mode = 'direct' 
+        elif conv_algo == 1:
+            self.mode = 'direct+' 
         else:
             print(f"Algoritmo {conv_algo} no soportado aún")
             self.mode = 'direct' 
@@ -60,6 +62,8 @@ class Conv2D(Layer):
         # PISTA: Usar estos if-else si implementas más algoritmos de convolución
         if self.mode == 'direct':
             return self._forward_direct(input)
+        elif self.mode == 'direct+':
+            return self._forward_direct_plus(input)
         else:
             raise ValueError("Mode must be 'direct")
 
@@ -88,13 +92,12 @@ class Conv2D(Layer):
         for b in range(batch_size):
             for out_c in range(self.out_channels):
                 for in_c in range(self.in_channels):
-                    kernel = self.kernels[out_c, in_c]
                     for i in range(out_h):
                         for j in range(out_w):
                             region = input[b, in_c,
                                            i * self.stride:i * self.stride + k_h,
                                            j * self.stride:j * self.stride + k_w]
-                            output[b, out_c, i, j] += np.sum(region * kernel)
+                            output[b, out_c, i, j] += np.sum(region * self.kernels[out_c, in_c])
                 output[b, out_c] += self.biases[out_c]
 
         return output
@@ -138,3 +141,32 @@ class Conv2D(Layer):
         return grad_input
 
     # PISTA: Se te ocurren otros algoritmos de convolución?
+
+    # --- DIRECT IMPLEMENTATION WITH IMPROVEMENT IN CACHING FILTER ---
+
+    def _forward_direct_plus(self, input):
+        batch_size, _, in_h, in_w = input.shape
+        k_h, k_w = self.kernel_size, self.kernel_size
+
+        if self.padding > 0:
+            input = np.pad(input,
+                           ((0, 0), (0, 0), (self.padding, self.padding), (self.padding, self.padding)),
+                           mode='constant').astype(np.float32)
+
+        out_h = (input.shape[2] - k_h) // self.stride + 1
+        out_w = (input.shape[3] - k_w) // self.stride + 1
+        output = np.zeros((batch_size, self.out_channels, out_h, out_w), dtype=np.float32)
+
+        for b in range(batch_size):
+            for out_c in range(self.out_channels):
+                for in_c in range(self.in_channels):
+                    kernel = self.kernels[out_c, in_c]
+                    for i in range(out_h):
+                        for j in range(out_w):
+                            region = input[b, in_c,
+                                           i * self.stride:i * self.stride + k_h,
+                                           j * self.stride:j * self.stride + k_w]
+                            output[b, out_c, i, j] += np.sum(region * kernel)
+                output[b, out_c] += self.biases[out_c]
+
+        return output
