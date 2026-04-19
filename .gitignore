@@ -1,0 +1,6 @@
+# Ignora el entorno virtual, se debe inicializar 
+# en local con el fichero requierements.txt
+venv
+
+# Ignora los directorios detro de ./data
+data/*/

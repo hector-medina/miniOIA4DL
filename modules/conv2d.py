@@ -88,12 +88,13 @@ class Conv2D(Layer):
         for b in range(batch_size):
             for out_c in range(self.out_channels):
                 for in_c in range(self.in_channels):
+                    kernel = self.kernels[out_c, in_c]
                     for i in range(out_h):
                         for j in range(out_w):
                             region = input[b, in_c,
                                            i * self.stride:i * self.stride + k_h,
                                            j * self.stride:j * self.stride + k_w]
-                            output[b, out_c, i, j] += np.sum(region * self.kernels[out_c, in_c])
+                            output[b, out_c, i, j] += np.sum(region * kernel)
                 output[b, out_c] += self.biases[out_c]
 
         return output

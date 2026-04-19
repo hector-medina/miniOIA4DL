@@ -1,0 +1,49 @@
+Building OIANet for CIFAR-100
+Measuring performance...
+FW Layer;Batch;Time(s);Performance(imgs/s)
+Conv2D;8;1.5838;5.05
+BatchNorm2D;8;0.0005;17102.16
+ReLU;8;0.0002;51228.14
+MaxPool2D;8;0.1222;65.45
+Conv2D;8;8.5424;0.94
+BatchNorm2D;8;0.0003;27302.22
+ReLU;8;0.0001;103563.06
+MaxPool2D;8;0.0641;124.80
+Conv2D;8;8.6840;0.92
+BatchNorm2D;8;0.0002;42527.80
+ReLU;8;0.0000;181375.31
+MaxPool2D;8;0.0323;247.72
+Flatten;8;0.0000;2581110.15
+Dense;8;1.5840;5.05
+ReLU;8;0.0000;447392.43
+Dropout;8;0.0011;7226.89
+Dense;8;0.0779;102.72
+Softmax;8;0.0001;97541.95
+==========================================
+Total time: 20.69s IPS: 0.39images/sec
+
+##########################################
+
+Building OIANet for CIFAR-100
+Measuring performance...
+FW Layer;Batch;Time(s);Performance(imgs/s)
+Conv2D;8;1.5504;5.16
+BatchNorm2D;8;0.0005;15842.51
+ReLU;8;0.0001;55097.59
+MaxPool2D;8;0.1260;63.49
+Conv2D;8;8.1160;0.99
+BatchNorm2D;8;0.0003;28777.39
+ReLU;8;0.0001;105186.31
+MaxPool2D;8;0.0639;125.20
+Conv2D;8;8.1452;0.98
+BatchNorm2D;8;0.0002;37407.39
+ReLU;8;0.0001;151146.09
+MaxPool2D;8;0.0327;244.40
+Flatten;8;0.0000;4194304.00
+Dense;8;1.5734;5.08
+ReLU;8;0.0000;621378.37
+Dropout;8;0.0012;6954.29
+Dense;8;0.0765;104.54
+Softmax;8;0.0001;119837.26
+==========================================
+Total time: 19.69s IPS: 0.41images/sec
