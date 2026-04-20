@@ -17,6 +17,8 @@ class Conv2D(Layer):
             self.mode = 'direct' 
         elif conv_algo == 1:
             self.mode = 'direct+' 
+        elif conv_algo == 2:
+            self.mode = 'direct-vectorized' 
         else:
             print(f"Algoritmo {conv_algo} no soportado aún")
             self.mode = 'direct' 
@@ -64,6 +66,8 @@ class Conv2D(Layer):
             return self._forward_direct(input)
         elif self.mode == 'direct+':
             return self._forward_direct_plus(input)
+        elif self.mode == 'direct-vectorized':
+            return self._forward_direct_vectorized(input)
         else:
             raise ValueError("Mode must be 'direct")
 
@@ -168,5 +172,35 @@ class Conv2D(Layer):
                                            j * self.stride:j * self.stride + k_w]
                             output[b, out_c, i, j] += np.sum(region * kernel)
                 output[b, out_c] += self.biases[out_c]
+
+        return output
+
+    # --- DIRECT IMPLEMENTATION - VECTORIZED  ---
+
+    def _forward_direct_vectorized(self, input):
+        batch_size, _, in_h, in_w = input.shape
+        k_h, k_w = self.kernel_size, self.kernel_size
+
+        if self.padding > 0:
+            input = np.pad(input,
+                           ((0, 0), (0, 0), (self.padding, self.padding), (self.padding, self.padding)),
+                           mode='constant').astype(np.float32)
+
+        out_h = (input.shape[2] - k_h) // self.stride + 1
+        out_w = (input.shape[3] - k_w) // self.stride + 1
+        output = np.zeros((batch_size, self.out_channels, out_h, out_w), dtype=np.float32)
+
+        for b in range(batch_size):
+            for out_c in range(self.out_channels):
+                kernel = self.kernels[out_c]
+                bias = self.biases[out_c]
+
+                for i in range(out_h):
+                    r = i * self.stride
+                    for j in range(out_w):
+                        c = j * self.stride
+
+                        region = input[b, :, r:r + k_h, c:c + k_w]
+                        output[b, out_c, i, j] = np.sum(region * kernel) + bias
 
         return output

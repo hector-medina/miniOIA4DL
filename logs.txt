@@ -1,3 +1,6 @@
+
+DIRECT
+
 Building OIANet for CIFAR-100
 Measuring performance...
 FW Layer;Batch;Time(s);Performance(imgs/s)
@@ -23,6 +26,7 @@ Softmax;8;0.0001;97541.95
 Total time: 20.69s IPS: 0.39images/sec
 
 ##########################################
+DIRECT PLUS
 
 Building OIANet for CIFAR-100
 Measuring performance...
@@ -47,3 +51,31 @@ Dense;8;0.0765;104.54
 Softmax;8;0.0001;119837.26
 ==========================================
 Total time: 19.69s IPS: 0.41images/sec
+
+
+##########################################
+DIRECT VECTORIZED
+
+Building OIANet for CIFAR-100
+Measuring performance...
+FW Layer;Batch;Time(s);Performance(imgs/s)
+Conv2D;8;0.5320;15.04
+BatchNorm2D;8;0.0005;17669.53
+ReLU;8;0.0001;54120.05
+MaxPool2D;8;0.1261;63.45
+Conv2D;8;0.2899;27.60
+BatchNorm2D;8;0.0003;31506.51
+ReLU;8;0.0001;112222.18
+MaxPool2D;8;0.0656;121.94
+Conv2D;8;0.1664;48.09
+BatchNorm2D;8;0.0002;47326.42
+ReLU;8;0.0000;195083.91
+MaxPool2D;8;0.0325;246.05
+Flatten;8;0.0000;2581110.15
+Dense;8;1.6148;4.95
+ReLU;8;0.0000;906876.54
+Dropout;8;0.0000;222214.78
+Dense;8;0.0782;102.35
+Softmax;8;0.0001;124737.67
+==========================================
+Total time: 2.91s IPS: 2.75images/sec
