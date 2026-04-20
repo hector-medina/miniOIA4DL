@@ -19,6 +19,10 @@ class Conv2D(Layer):
             self.mode = 'direct+' 
         elif conv_algo == 2:
             self.mode = 'direct-vectorized' 
+        elif conv_algo == 3:
+            self.mode = 'im2col'
+        elif conv_algo == 4:
+            self.mode = 'im2col-gemm'
         else:
             print(f"Algoritmo {conv_algo} no soportado aún")
             self.mode = 'direct' 
@@ -68,6 +72,10 @@ class Conv2D(Layer):
             return self._forward_direct_plus(input)
         elif self.mode == 'direct-vectorized':
             return self._forward_direct_vectorized(input)
+        elif self.mode == 'im2col':
+            return self._forward_im2col(input)
+        elif self.mode == 'im2col-gemm':
+            return self._forward_im2col_gemm(input)
         else:
             raise ValueError("Mode must be 'direct")
 
@@ -202,5 +210,81 @@ class Conv2D(Layer):
 
                         region = input[b, :, r:r + k_h, c:c + k_w]
                         output[b, out_c, i, j] = np.sum(region * kernel) + bias
+
+        return output
+
+
+    # --- IM2COL AUXILIARY METHOD ---
+
+    def _im2col(self, input):
+        batch_size, _, in_h, in_w = input.shape
+        k_h, k_w = self.kernel_size, self.kernel_size
+
+        out_h = (in_h - k_h) // self.stride + 1
+        out_w = (in_w - k_w) // self.stride + 1
+
+        cols = np.zeros(
+            (batch_size, out_h * out_w, self.in_channels * k_h * k_w),
+            dtype=np.float32
+        )
+
+        for b in range(batch_size):
+            col_idx = 0
+            for i in range(out_h):
+                r = i * self.stride
+                for j in range(out_w):
+                    c = j * self.stride
+                    patch = input[b, :, r:r + k_h, c:c + k_w]
+                    cols[b, col_idx, :] = patch.reshape(-1)
+                    col_idx += 1
+
+        return cols, out_h, out_w
+
+    # --- IM2COL IMPLEMENTATION ---
+
+    def _forward_im2col(self, input):
+        batch_size, _, in_h, in_w = input.shape
+        k_h, k_w = self.kernel_size, self.kernel_size
+
+        if self.padding > 0:
+            input = np.pad(input,
+                           ((0, 0), (0, 0), (self.padding, self.padding), (self.padding, self.padding)),
+                           mode='constant').astype(np.float32)
+
+        cols, out_h, out_w = self._im2col(input)
+        output = np.zeros((batch_size, self.out_channels, out_h, out_w), dtype=np.float32)
+
+        for b in range(batch_size):
+            for out_c in range(self.out_channels):
+                kernel_col = self.kernels[out_c].reshape(-1)
+
+                for pos in range(out_h * out_w):
+                    output[b, out_c, pos // out_w, pos % out_w] = (
+                        np.sum(cols[b, pos] * kernel_col) + self.biases[out_c]
+                    )
+
+        return output
+
+    # --- IM2COL IMPLEMENTATION - GEMM ---
+    # --- GENERADA CON IA ---
+    def _forward_im2col_gemm(self, input):
+        batch_size, _, in_h, in_w = input.shape
+        k_h, k_w = self.kernel_size, self.kernel_size
+
+        if self.padding > 0:
+            input = np.pad(input,
+                           ((0, 0), (0, 0), (self.padding, self.padding), (self.padding, self.padding)),
+                           mode='constant').astype(np.float32)
+
+        cols, out_h, out_w = self._im2col(input)
+
+        kernels_col = self.kernels.reshape(self.out_channels, -1).astype(np.float32)
+        output = np.zeros((batch_size, self.out_channels, out_h, out_w), dtype=np.float32)
+
+        for b in range(batch_size):
+            # cols[b]: (out_h*out_w, in_channels*k_h*k_w)
+            # kernels_col.T: (in_channels*k_h*k_w, out_channels)
+            out_mat = cols[b] @ kernels_col.T + self.biases
+            output[b] = out_mat.T.reshape(self.out_channels, out_h, out_w)
 
         return output

@@ -79,3 +79,68 @@ Dense;8;0.0782;102.35
 Softmax;8;0.0001;124737.67
 ==========================================
 Total time: 2.91s IPS: 2.75images/sec
+
+
+im2col sin GEMM
+
+Building OIANet for CIFAR-100
+Measuring performance...
+FW Layer;Batch;Time(s);Performance(imgs/s)
+Conv2D;8;0.4104;19.49
+BatchNorm2D;8;0.0005;15932.78
+ReLU;8;0.0001;56017.42
+MaxPool2D;8;0.1231;64.99
+Conv2D;8;0.2263;35.35
+BatchNorm2D;8;0.0003;28079.02
+ReLU;8;0.0001;103883.69
+MaxPool2D;8;0.0635;126.01
+Conv2D;8;0.1303;61.39
+BatchNorm2D;8;0.0002;50994.58
+ReLU;8;0.0000;275036.33
+MaxPool2D;8;0.0322;248.54
+Flatten;8;0.0000;3728270.22
+/Users/hector.medina/Documents/upv/MUCNAP/02 SEMESTRE/OIA/project-ioa/miniOIA4DL/modules/utils.py:15: RuntimeWarning: divide by zero encountered in matmul
+  C = A @ B + bias
+/Users/hector.medina/Documents/upv/MUCNAP/02 SEMESTRE/OIA/project-ioa/miniOIA4DL/modules/utils.py:15: RuntimeWarning: overflow encountered in matmul
+  C = A @ B + bias
+/Users/hector.medina/Documents/upv/MUCNAP/02 SEMESTRE/OIA/project-ioa/miniOIA4DL/modules/utils.py:15: RuntimeWarning: invalid value encountered in matmul
+  C = A @ B + bias
+Dense;8;0.0030;2648.96
+ReLU;8;0.0000;1290555.08
+Dropout;8;0.0003;25970.92
+Dense;8;0.0000;294337.12
+Softmax;8;0.0001;140395.11
+==========================================
+im2col + GEMM
+
+Total time: 0.99s IPS: 8.08images/sec
+(venv) ➜  miniOIA4DL git:(main) ✗ python3 main.py --conv_algo 4
+Building OIANet for CIFAR-100
+Measuring performance...
+FW Layer;Batch;Time(s);Performance(imgs/s)
+Conv2D;8;0.0046;1746.35
+BatchNorm2D;8;0.0004;18108.17
+ReLU;8;0.0001;62601.55
+MaxPool2D;8;0.1229;65.08
+Conv2D;8;0.0021;3818.64
+BatchNorm2D;8;0.0003;28508.44
+ReLU;8;0.0001;103883.69
+MaxPool2D;8;0.0614;130.24
+Conv2D;8;0.0010;8272.79
+BatchNorm2D;8;0.0001;58355.53
+ReLU;8;0.0000;299593.14
+MaxPool2D;8;0.0316;253.49
+Flatten;8;0.0000;3728270.22
+/Users/hector.medina/Documents/upv/MUCNAP/02 SEMESTRE/OIA/project-ioa/miniOIA4DL/modules/utils.py:15: RuntimeWarning: divide by zero encountered in matmul
+  C = A @ B + bias
+/Users/hector.medina/Documents/upv/MUCNAP/02 SEMESTRE/OIA/project-ioa/miniOIA4DL/modules/utils.py:15: RuntimeWarning: overflow encountered in matmul
+  C = A @ B + bias
+/Users/hector.medina/Documents/upv/MUCNAP/02 SEMESTRE/OIA/project-ioa/miniOIA4DL/modules/utils.py:15: RuntimeWarning: invalid value encountered in matmul
+  C = A @ B + bias
+Dense;8;0.0013;6304.85
+ReLU;8;0.0000;1597830.10
+Dropout;8;0.0000;294337.12
+Dense;8;0.0000;335544.32
+Softmax;8;0.0001;137518.16
+==========================================
+Total time: 0.23s IPS: 35.38images/sec
